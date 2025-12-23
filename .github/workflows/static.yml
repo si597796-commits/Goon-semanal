@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goon Semanal - Widget</title>
+    <meta name="theme-color" content="#218085">
+    <meta name="description" content="Contador semanal partilhado para Bobinho e Bobinha">
+    <link rel="manifest" href="data:application/json,{%22name%22:%22Goon%20Semanal%22,%22short_name%22:%22Goon%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22background_color%22:%22%23fff%22,%22theme_color%22:%22%23218085%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20192%20192%27%3E%3Crect%20fill=%27%23218085%27%20width=%27192%27%20height=%27192%27/%3E%3Ctext%20x=%2750%25%27%20y=%2750%25%27%20font-size=%27120%27%20font-weight=%27bold%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%20fill=%27white%27%3E🎮%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22}]}">
+    <style>
+        :root {
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-cream-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-success: var(--color-teal-500);
+            --color-error: var(--color-red-500);
+            --color-border: rgba(94, 82, 64, 0.2);
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --space-16: 16px;
+            --space-20: 20px;
+            --space-24: 24px;
+            --space-32: 32px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, #f5f5f2 0%, #e8e8e5 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-16);
+            color: var(--color-text);
+        }
+
+        .container {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: var(--space-24);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: var(--space-32);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: var(--space-16);
+            color: var(--color-text);
+        }
+
+        .week-info {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-20);
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: rgba(33, 128, 141, 0.15);
+            color: var(--color-success);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: var(--space-16);
+        }
+
+        .counters-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-20);
+            margin-bottom: var(--space-32);
+        }
+
+        .counter-card {
+            background: var(--color-background);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-20);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .counter-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 4px 12px rgba(33, 128, 141, 0.15);
+        }
+
+        .counter-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-16);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .counter-value {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: var(--space-20);
+            line-height: 1;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+            width: 100%;
+            margin-bottom: var(--space-16);
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(33, 128, 141, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(33, 128, 141, 0.1);
+            color: var(--color-primary);
+            width: 100%;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(33, 128, 141, 0.2);
+        }
+
+        .btn-danger {
+            background: rgba(192, 21, 47, 0.1);
+            color: var(--color-error);
+            width: 100%;
+            margin-top: var(--space-20);
+        }
+
+        .btn-danger:hover {
+            background: rgba(192, 21, 47, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-16);
+            margin-top: var(--space-32);
+            padding-top: var(--space-24);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .reset-section {
+            text-align: center;
+        }
+
+        .reset-section p {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-16);
+        }
+
+        .share-section {
+            background: rgba(33, 128, 141, 0.05);
+            padding: var(--space-16);
+            border-radius: 8px;
+            margin-bottom: var(--space-20);
+        }
+
+        .share-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-16);
+            display: block;
+        }
+
+        .share-code {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--color-border);
+            font-family: monospace;
+            font-size: 13px;
+            text-align: center;
+            word-break: break-all;
+            color: var(--color-text);
+            margin-bottom: var(--space-16);
+        }
+
+        .btn-copy {
+            background: var(--color-primary);
+            color: white;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .message {
+            padding: var(--space-16);
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: var(--space-16);
+            text-align: center;
+        }
+
+        .message.success {
+            background: rgba(33, 128, 141, 0.15);
+            color: var(--color-success);
+            border: 1px solid rgba(33, 128, 141, 0.3);
+        }
+
+        .message.info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #1e40af;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .instructions {
+            background: rgba(59, 130, 246, 0.1);
+            padding: var(--space-16);
+            border-radius: 8px;
+            margin-bottom: var(--space-20);
+            font-size: 13px;
+            color: #1e40af;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: var(--space-16);
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .counter-value {
+                font-size: 42px;
+            }
+
+            .counters-section {
+                gap: var(--space-16);
+            }
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Goon Semanal</h1>
+            <div class="week-info">
+                <strong>Semana de</strong><br>
+                <span id="weekRange"></span>
+                <div class="status-badge" id="resetInfo">Reseta em <span id="daysUntilReset">-</span> dias</div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <strong>📱 Como adicionar à tela inicial:</strong><br>
+            Chrome: Menu (⋮) → Instalar app<br>
+            Safari: Partilhar → Adicionar à Tela inicial
+        </div>
+
+        <div id="message" class="message" style="display: none;"></div>
+
+        <div class="counters-section">
+            <div class="counter-card">
+                <div class="counter-name">Bobinho</div>
+                <div class="counter-value" id="counter1">0</div>
+                <button class="btn btn-primary" onclick="incrementCounter(1)">➕ Adicionar</button>
+                <button class="btn btn-secondary" onclick="decrementCounter(1)">➖ Remover</button>
+            </div>
+
+            <div class="counter-card">
+                <div class="counter-name">Bobinha</div>
+                <div class="counter-value" id="counter2">0</div>
+                <button class="btn btn-primary" onclick="incrementCounter(2)">➕ Adicionar</button>
+                <button class="btn btn-secondary" onclick="decrementCounter(2)">➖ Remover</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="share-section">
+                <label class="share-label">Código para Partilhar:</label>
+                <div class="share-code" id="shareCode">CÓDIGO</div>
+                <button class="btn btn-copy" onclick="copyShareCode()">📋 Copiar Código</button>
+            </div>
+
+            <div>
+                <input 
+                    type="text" 
+                    id="joinInput" 
+                    placeholder="Cole o código para entrar..." 
+                    style="width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 8px; font-size: 14px; margin-bottom: 8px;"
+                    onkeypress="if(event.key === 'Enter') joinSession();"
+                >
+                <button class="btn btn-primary" onclick="joinSession()">🔗 Entrar na Sessão</button>
+            </div>
+
+            <div class="reset-section">
+                <p>Os contadores resetam automaticamente todas as segundas-feiras (00:00)</p>
+                <button class="btn btn-danger" onclick="manualReset()">🔄 Resetar Agora</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const APP_NAME = "ContadorSemanal";
+        const STORAGE_KEY_DATA = `${APP_NAME}_data`;
+        const STORAGE_KEY_SESSION = `${APP_NAME}_session`;
+
+        function initApp() {
+            checkAndResetCounters();
+            loadData();
+            updateUI();
+            generateShareCode();
+            displayWeekInfo();
+        }
+
+        function generateShareCode() {
+            let code = localStorage.getItem(`${STORAGE_KEY_SESSION}`);
+            if (!code) {
+                code = generateRandomCode(6);
+                localStorage.setItem(`${STORAGE_KEY_SESSION}`, code);
+            }
+            document.getElementById("shareCode").textContent = code;
+        }
+
+        function generateRandomCode(length) {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let code = "";
+            for (let i = 0; i < length; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        function loadData() {
+            const data = JSON.parse(localStorage.getItem(STORAGE_KEY_DATA));
+            if (data) {
+                document.getElementById("counter1").textContent = data.counter1;
+                document.getElementById("counter2").textContent = data.counter2;
+            }
+        }
+
+        function saveData() {
+            const data = {
+                counter1: parseInt(document.getElementById("counter1").textContent),
+                counter2: parseInt(document.getElementById("counter2").textContent),
+                lastReset: new Date().toISOString()
+            };
+            localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(data));
+        }
+
+        function incrementCounter(person) {
+            const counterId = `counter${person}`;
+            let value = parseInt(document.getElementById(counterId).textContent);
+            value++;
+            document.getElementById(counterId).textContent = value;
+            saveData();
+            updateUI();
+            showMessage(`✅ Contador ${person} incrementado!`, "success");
+        }
+
+        function decrementCounter(person) {
+            const counterId = `counter${person}`;
+            let value = parseInt(document.getElementById(counterId).textContent);
+            if (value > 0) {
+                value--;
+                document.getElementById(counterId).textContent = value;
+                saveData();
+                updateUI();
+                showMessage(`✅ Contador ${person} decrementado!`, "success");
+            }
+        }
+
+        function copyShareCode() {
+            const code = document.getElementById("shareCode").textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showMessage("📋 Código copiado para a área de transferência!", "success");
+            });
+        }
+
+        function joinSession() {
+            const input = document.getElementById("joinInput");
+            const code = input.value.trim().toUpperCase();
+
+            if (!code) {
+                showMessage("⚠️ Por favor, cole um código válido!", "info");
+                return;
+            }
+
+            localStorage.setItem(`${STORAGE_KEY_SESSION}`, code);
+            input.value = "";
+            generateShareCode();
+            showMessage(`✅ Entrou na sessão: ${code}`, "success");
+            loadData();
+            updateUI();
+        }
+
+        function manualReset() {
+            if (confirm("Tem a certeza que quer resetar os contadores? Esta ação não pode ser desfeita.")) {
+                resetCounters();
+                showMessage("🔄 Contadores resetados com sucesso!", "success");
+            }
+        }
+
+        function resetCounters() {
+            document.getElementById("counter1").textContent = "0";
+            document.getElementById("counter2").textContent = "0";
+            localStorage.setItem(`${STORAGE_KEY_DATA}`, JSON.stringify({
+                counter1: 0,
+                counter2: 0,
+                lastReset: new Date().toISOString()
+            }));
+            updateUI();
+        }
+
+        function checkAndResetCounters() {
+            const data = JSON.parse(localStorage.getItem(STORAGE_KEY_DATA));
+            if (!data || !data.lastReset) {
+                return;
+            }
+
+            const lastReset = new Date(data.lastReset);
+            const today = new Date();
+            const monday = new Date(today);
+            monday.setDate(today.getDate() - (today.getDay() - 1));
+            monday.setHours(0, 0, 0, 0);
+
+            if (lastReset < monday) {
+                resetCounters();
+            }
+        }
+
+        function showMessage(text, type) {
+            const messageEl = document.getElementById("message");
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = "block";
+
+            setTimeout(() => {
+                messageEl.style.display = "none";
+            }, 3000);
+        }
+
+        function updateUI() {
+            const today = new Date();
+            const daysUntilMonday = (8 - today.getDay()) % 7 || 7;
+            document.getElementById("daysUntilReset").textContent = daysUntilMonday;
+        }
+
+        function displayWeekInfo() {
+            const today = new Date();
+            const monday = new Date(today);
+            monday.setDate(today.getDate() - (today.getDay() - 1));
+            
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+
+            const options = { day: "2-digit", month: "short" };
+            const mondayStr = monday.toLocaleDateString("pt-PT", options);
+            const sundayStr = sunday.toLocaleDateString("pt-PT", options);
+
+            document.getElementById("weekRange").textContent = `${mondayStr} a ${sundayStr}`;
+        }
+
+        window.addEventListener("load", initApp);
+
+        // Registar Service Worker para funcionar offline
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', event => {
+                    self.skipWaiting();
+                });
+                self.addEventListener('activate', event => {
+                    event.waitUntil(clients.claim());
+                });
+                self.addEventListener('fetch', event => {
+                    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).catch(() => {});
+        }
+    </script>
+</body>
+</html>
