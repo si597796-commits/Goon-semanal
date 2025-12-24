@@ -22,12 +22,14 @@
     label{display:block;font-size:12px;font-weight:600;color:#627c7d;margin-bottom:6px;text-transform:uppercase}
     input{width:100%;padding:10px 12px;border:1px solid rgba(94,82,64,.2);border-radius:8px;font-size:14px;background:#fffffe;transition:border-color .25s}
     input:focus{outline:none;border-color:#208091;box-shadow:0 0 0 3px rgba(33,128,141,.4)}
-    button{padding:12px 20px;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all .25s;font-family:inherit}
-    .btn-primary{background:#208091;color:#fcfcf9;width:100%;margin-top:15px}
+    button{padding:10px 18px;border:none;border-radius:999px;font-size:18px;font-weight:600;cursor:pointer;transition:all .25s;font-family:inherit;margin:0 5px}
+    .btn-primary{background:#208091;color:#fcfcf9;width:100%;margin-top:15px;font-size:14px;border-radius:8px}
     .btn-primary:hover{background:#1d7480}
-    .btn-increment{background:#208091;color:#fff;border-radius:50%;width:70px;height:70px;font-size:24px;font-weight:700;margin:15px auto}
-    .btn-increment:hover{background:#1d7480;transform:scale(1.05)}
-    button:active{transform:scale(.98)}
+    .btn-inc{background:#27ae60;color:#fff}
+    .btn-inc:hover{background:#219150;transform:scale(1.05)}
+    .btn-dec{background:#e74c3c;color:#fff}
+    .btn-dec:hover{background:#c0392b;transform:scale(1.05)}
+    button:active{transform:scale(.96)}
     .devices-grid{display:grid;grid-template-columns:1fr 1fr;gap:30px}
     .device{text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.04)}
     .device-label{font-size:12px;font-weight:600;color:#627c7d;text-transform:uppercase;letter-spacing:.05em;margin-bottom:20px}
@@ -78,15 +80,23 @@
       <div class="device device1">
         <div class="device-label">👦 Bobinho</div>
         <div class="counter-display" id="counter1">0</div>
-        <button class="btn-increment" onclick="incrementCounter(1)">+</button>
+        <div>
+          <button class="btn-dec" onclick="decrementCounter(1)">−</button>
+          <button class="btn-inc" onclick="incrementCounter(1)">+</button>
+        </div>
         <div class="reset-info" id="resetInfo1">Reset: 7 dias</div>
       </div>
+
       <div class="device device2">
         <div class="device-label">👧 Bobinha</div>
         <div class="counter-display" id="counter2">0</div>
-        <button class="btn-increment" onclick="incrementCounter(2)">+</button>
+        <div>
+          <button class="btn-dec" onclick="decrementCounter(2)">−</button>
+          <button class="btn-inc" onclick="incrementCounter(2)">+</button>
+        </div>
         <div class="reset-info" id="resetInfo2">Reset: 7 dias</div>
       </div>
+
       <div class="total-display">
         <h3>Total Semanal</h3>
         <div class="total-number" id="totalCounter">0</div>
@@ -133,9 +143,9 @@
 
       try {
         firebase.initializeApp(config);
-        db = firebase.database();                         // [web:75]
+        db = firebase.database();                               /* [web:75] */
 
-        db.ref('.info/connected').on('value', (snap) => { // [web:75]
+        db.ref('.info/connected').on('value', (snap) => {       /* [web:75] */
           if (snap.val()) {
             isConnected = true;
             status.textContent = '● Conectado ✅';
@@ -160,13 +170,13 @@
       location.reload();
     }
 
-    // Reset semanal simples usando meta/lastReset
+    // Reset semanal
     function checkReset() {
       db.ref('meta/lastReset').once('value').then((snap) => {
         const now  = new Date();
         const last = snap.val();
         if (!last || (now - new Date(last)) / 86400000 >= 7) {
-          db.ref('counters').set({ bobinho: 0, bobinha: 0, total: 0 });       // [web:75]
+          db.ref('counters').set({ bobinho: 0, bobinha: 0, total: 0 });  /* [web:75] */
           db.ref('meta/lastReset').set(now.toISOString());
           resetInfo1.textContent = '✅ Reset hoje';
           resetInfo2.textContent = '✅ Reset hoje';
@@ -178,18 +188,18 @@
       });
     }
 
-    // Listener em tempo real em /counters
+    // Listener em tempo real
     function startListener() {
-      db.ref('counters').on('value', (snap) => {          // [web:75]
+      db.ref('counters').on('value', (snap) => {               /* [web:75] */
         const data = snap.val() || { bobinho: 0, bobinha: 0, total: 0 };
         current = data;
-        counter1.textContent    = data.bobinho || 0;
-        counter2.textContent    = data.bobinha || 0;
-        totalCounter.textContent= data.total   || 0;
+        counter1.textContent     = data.bobinho || 0;
+        counter2.textContent     = data.bobinha || 0;
+        totalCounter.textContent = data.total   || 0;
       });
     }
 
-    // Incremento simples com set()
+    // Incrementa
     function incrementCounter(device) {
       if (!isConnected) {
         alert('Conecte primeiro!');
@@ -201,15 +211,36 @@
       else              data.bobinha = (data.bobinha || 0) + 1;
       data.total = (data.bobinho || 0) + (data.bobinha || 0);
 
-      db.ref('counters').set(data);                       // [web:75][web:108]
+      db.ref('counters').set(data);                           /* [web:75][web:108] */
     }
 
-    window.connectFirebase = connectFirebase;
-    window.incrementCounter = incrementCounter;
-    window.clearSaved       = clearSaved;
+    // Diminui até 0
+    function decrementCounter(device) {
+      if (!isConnected) {
+        alert('Conecte primeiro!');
+        return;
+      }
+
+      const data = { ...current };
+      if (device === 1) {
+        data.bobinho = Math.max(0, (data.bobinho || 0) - 1);
+      } else {
+        data.bobinha = Math.max(0, (data.bobinha || 0) - 1);
+      }
+      data.total = (data.bobinho || 0) + (data.bobinha || 0);
+
+      db.ref('counters').set(data);                           /* [web:75][web:108] */
+    }
+
+    window.connectFirebase    = connectFirebase;
+    window.incrementCounter   = incrementCounter;
+    window.decrementCounter   = decrementCounter;
+    window.clearSaved         = clearSaved;
   </script>
 </body>
 </html>
+
+
 
 
 
