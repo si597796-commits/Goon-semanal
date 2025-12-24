@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Goon Semanal ✅</title>
+  <!-- Firebase compat (v9) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
@@ -44,7 +45,7 @@
 <body>
   <div class="container">
     <header>
-      <h1>🎯 Goon Semanal ✅</h1>
+      <h1>🎯 Goon Semanal</h1>
       <div class="status" id="status">● Desconectado</div>
     </header>
 
@@ -57,15 +58,15 @@
         </div>
         <div class="form-group">
           <label>Database URL</label>
-          <input id="databaseURL" placeholder="https://projeto-default-rtdb.firebaseio.com/">
+          <input id="databaseURL" placeholder="https://teu-projeto-default-rtdb.firebaseio.com/">
         </div>
         <div class="form-group">
           <label>Project ID</label>
-          <input id="projectId" placeholder="projeto">
+          <input id="projectId" placeholder="teu-projeto">
         </div>
         <div class="form-group">
           <label>Auth Domain</label>
-          <input id="authDomain" placeholder="projeto.firebaseapp.com">
+          <input id="authDomain" placeholder="teu-projeto.firebaseapp.com">
         </div>
       </div>
       <div class="info-box">Firebase Console → ⚙️ → Chaves da Web</div>
@@ -97,7 +98,7 @@
     let db, isConnected = false;
     let current = { bobinho: 0, bobinha: 0, total: 0 };
 
-    // Carregar credenciais salvas
+    // Carrega credenciais salvas
     window.onload = function () {
       const saved = localStorage.getItem('goonFirebase');
       if (saved) {
@@ -132,9 +133,9 @@
 
       try {
         firebase.initializeApp(config);
-        db = firebase.database();
+        db = firebase.database();                         // [web:75]
 
-        db.ref('.info/connected').on('value', (snap) => {
+        db.ref('.info/connected').on('value', (snap) => { // [web:75]
           if (snap.val()) {
             isConnected = true;
             status.textContent = '● Conectado ✅';
@@ -159,12 +160,13 @@
       location.reload();
     }
 
+    // Reset semanal simples usando meta/lastReset
     function checkReset() {
       db.ref('meta/lastReset').once('value').then((snap) => {
-        const now = new Date();
+        const now  = new Date();
         const last = snap.val();
         if (!last || (now - new Date(last)) / 86400000 >= 7) {
-          db.ref('counters').set({ bobinho: 0, bobinha: 0, total: 0 });
+          db.ref('counters').set({ bobinho: 0, bobinha: 0, total: 0 });       // [web:75]
           db.ref('meta/lastReset').set(now.toISOString());
           resetInfo1.textContent = '✅ Reset hoje';
           resetInfo2.textContent = '✅ Reset hoje';
@@ -176,17 +178,18 @@
       });
     }
 
+    // Listener em tempo real em /counters
     function startListener() {
-      db.ref('counters').on('value', (snap) => {
+      db.ref('counters').on('value', (snap) => {          // [web:75]
         const data = snap.val() || { bobinho: 0, bobinha: 0, total: 0 };
         current = data;
-        counter1.textContent = data.bobinho || 0;
-        counter2.textContent = data.bobinha || 0;
-        totalCounter.textContent = data.total || 0;
+        counter1.textContent    = data.bobinho || 0;
+        counter2.textContent    = data.bobinha || 0;
+        totalCounter.textContent= data.total   || 0;
       });
     }
 
-    // incrementa usando set simples (sem transaction, sem travar botão)
+    // Incremento simples com set()
     function incrementCounter(device) {
       if (!isConnected) {
         alert('Conecte primeiro!');
@@ -198,13 +201,15 @@
       else              data.bobinha = (data.bobinha || 0) + 1;
       data.total = (data.bobinho || 0) + (data.bobinha || 0);
 
-      db.ref('counters').set(data);
+      db.ref('counters').set(data);                       // [web:75][web:108]
     }
 
     window.connectFirebase = connectFirebase;
     window.incrementCounter = incrementCounter;
-    window.clearSaved = clearSaved;
+    window.clearSaved       = clearSaved;
   </script>
 </body>
 </html>
+
+
 
